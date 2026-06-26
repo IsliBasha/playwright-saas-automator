@@ -1,0 +1,27 @@
+{
+  "name": "playwright-saas-automator",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Resilient SaaS browser automation with ARIA-first selectors and Claude-powered selector repair",
+  "scripts": {
+    "test:unit": "vitest run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^22.5.0",
+    "@vitest/coverage-v8": "^2.1.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}
