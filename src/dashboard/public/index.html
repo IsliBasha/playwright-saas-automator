@@ -3,240 +3,626 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>playwright-saas-automator // ops-terminal</title>
+  <title>Playwright SaaS Automator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
-
     :root {
-      --bg:        #0A0E0A;
-      --bg-panel:  #0F150F;
-      --bg-dim:    #141A14;
-      --border:    #1E2A1E;
-      --text:      #C8D8C8;
-      --text-dim:  #4A5A4A;
-      --text-faint:#2A382A;
-      --green:     #39FF14;
-      --amber:     #F5B041;
-      --magenta:   #FF00FF;
-      --red:       #FF3B30;
-      --cyan:      #00FFFF;
+      --bg:           #F6F8FA;
+      --surface:      #FFFFFF;
+      --border:       #D0D7DE;
+      --border-muted: #EAEEF2;
+      --text:         #24292F;
+      --text-muted:   #57606A;
+      --text-faint:   #8C959F;
+      --accent:       #0969DA;
+      --accent-bg:    #DDF4FF;
+      --accent-border:#9DCAED;
+      --green:        #1A7F37;
+      --green-bg:     #DAFBE1;
+      --green-border: #A2DCAC;
+      --red:          #CF222E;
+      --red-bg:       #FFEBE9;
+      --red-border:   #F5B8BE;
+      --purple:       #8250DF;
+      --purple-bg:    #FBEFFF;
+      --purple-border:#D0B3F5;
+      --orange:       #BC4C00;
+      --orange-bg:    #FFF1E5;
+      --orange-border:#F0C285;
+      --shadow-xs:    0 1px 2px rgba(27,31,36,0.06);
+      --shadow-sm:    0 1px 4px rgba(27,31,36,0.08);
+      --radius:       6px;
+      --radius-sm:    4px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: 48px 1fr;
       overflow: hidden;
     }
 
+    /* ── Header ──────────────────────────────────────── */
     header {
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
       display: flex;
       align-items: center;
-      gap: 24px;
-      background: var(--bg-panel);
+      padding: 0 16px;
+      gap: 10px;
+      box-shadow: var(--shadow-xs);
+      z-index: 10;
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      user-select: none;
+    }
 
     .brand-icon {
-      width: 28px; height: 28px;
-      border: 1px solid var(--green);
-      display: grid; place-items: center;
+      width: 26px; height: 26px;
+      background: var(--accent);
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
 
-    .brand-icon svg { width: 16px; height: 16px; }
+    .brand-icon svg { display: block; }
 
-    .brand-name { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; }
-    .brand-name span { color: var(--text-dim); }
+    .brand-sub {
+      color: var(--text-faint);
+      font-weight: 400;
+      font-size: 13px;
+    }
 
-    .header-status {
+    .header-right {
       margin-left: auto;
-      display: flex; align-items: center; gap: 16px;
-      font-size: 10px; color: var(--text-dim);
-      letter-spacing: 0.1em; text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); display: inline-block; }
-    .dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    .run-pill {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 10px;
+    }
 
+    /* ── Workspace ──────────────────────────────────── */
     .workspace {
       display: grid;
-      grid-template-columns: 280px 1fr 340px;
-      height: calc(100vh - 53px);
+      grid-template-columns: 252px 1fr 280px;
+      height: calc(100vh - 48px);
       overflow: hidden;
     }
 
-    /* ── Sidebar ── */
-    .sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    /* ── Sidebar ────────────────────────────────────── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-    .sidebar-section { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+    .sidebar-section {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border-muted);
+    }
+
+    .sidebar-section.grow {
+      flex: 1;
+      overflow-y: auto;
+      border-bottom: none;
+    }
 
     .section-label {
-      font-size: 9px; color: var(--text-faint);
-      letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
     }
 
-    .automation-btn {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; padding: 8px 10px;
-      background: transparent; border: 1px solid transparent;
-      color: var(--text-dim); font-family: inherit; font-size: 11px;
-      cursor: pointer; text-align: left; letter-spacing: 0.04em;
-      transition: all 0.12s;
+    /* Automation buttons */
+    .auto-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      margin-bottom: 1px;
     }
 
-    .automation-btn:hover { color: var(--text); border-color: var(--border); }
-    .automation-btn.active { color: var(--green); border-color: var(--green); background: rgba(57,255,20,0.04); }
-    .automation-btn .icon { opacity: .5; font-size: 13px; }
-    .automation-btn.active .icon { opacity: 1; }
+    .auto-btn:hover { background: var(--bg); color: var(--text); }
 
-    .action-toggle { display: flex; gap: 8px; margin-top: 4px; }
-
-    .toggle-btn {
-      flex: 1; padding: 6px;
-      background: transparent; border: 1px solid var(--border);
-      color: var(--text-dim); font-family: inherit; font-size: 10px;
-      cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.12s;
+    .auto-btn.active {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+      color: var(--accent);
     }
 
-    .toggle-btn.active.provision  { border-color: var(--green);  color: var(--green);  background: rgba(57,255,20,0.06); }
-    .toggle-btn.active.deprovision{ border-color: var(--amber);  color: var(--amber);  background: rgba(245,176,65,0.06); }
+    .auto-avatar {
+      width: 20px; height: 20px;
+      border-radius: var(--radius-sm);
+      background: var(--border-muted);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
 
-    .field-group { margin-top: 12px; }
+    .auto-btn.active .auto-avatar { background: rgba(9,105,218,0.12); }
+
+    /* Action toggle */
+    .action-toggle {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 5px 6px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s, box-shadow 0.1s;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover { color: var(--text); }
+
+    .action-btn.active.provision {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .action-btn.active.deprovision {
+      background: var(--surface);
+      color: var(--orange);
+      box-shadow: var(--shadow-xs);
+    }
+
+    /* Form fields */
+    .field { margin-top: 9px; }
 
     .field-label {
-      display: block; font-size: 9px; color: var(--text-faint);
-      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px;
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 4px;
     }
 
-    .field-input {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); font-family: inherit; font-size: 11px;
-      padding: 7px 9px; outline: none; transition: border-color 0.12s;
-    }
-
-    .field-input:focus { border-color: var(--cyan); }
-    .field-input::placeholder { color: var(--text-faint); }
-
+    .field-input,
     .field-select {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); font-family: inherit; font-size: 11px;
-      padding: 7px 9px; outline: none; appearance: none; cursor: pointer;
+      width: 100%;
+      padding: 5px 9px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
+
+    .field-input:focus,
+    .field-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(9,105,218,0.1);
+    }
+
+    .field-input::placeholder { color: var(--text-faint); }
+    .field-select { appearance: none; cursor: pointer; }
 
     .run-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; margin-top: 14px; padding: 10px;
-      background: transparent; border: 1px solid var(--green);
-      color: var(--green); font-family: inherit; font-size: 11px; font-weight: 500;
-      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+      width: 100%;
+      margin-top: 14px;
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--accent);
+      color: #FFFFFF;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.15s, opacity 0.15s;
+      box-shadow: 0 1px 0 rgba(27,31,36,0.1), inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
-    .run-btn:hover { background: rgba(57,255,20,0.08); box-shadow: 0 0 12px rgba(57,255,20,0.15); }
-    .run-btn:disabled { border-color: var(--text-faint); color: var(--text-faint); cursor: not-allowed; }
-    .run-btn.running { border-color: var(--amber); color: var(--amber); animation: blink-border 0.8s infinite; }
-    @keyframes blink-border { 0%,100% { border-color: var(--amber); } 50% { border-color: var(--text-faint); } }
-    .run-spinner { display: none; }
-    .run-btn.running .run-spinner { display: inline; }
+    .run-btn:hover:not(:disabled) { background: #0860CA; }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .run-btn.running {
+      background: #0860CA;
+      opacity: 1;
+      cursor: default;
+    }
+
+    .spinner {
+      display: none;
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .run-btn.running .spinner { display: block; }
     .run-btn.running .run-label { display: none; }
 
-    /* ── Terminal ── */
-    .terminal-pane { display: flex; flex-direction: column; overflow: hidden; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Audit log (timeline) ──────────────────────── */
+    .log-pane {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
 
     .pane-header {
-      padding: 8px 16px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 10px; color: var(--text-dim);
-      letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg-panel);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 14px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-xs);
     }
 
-    .pane-title { display: flex; align-items: center; gap: 8px; }
+    .pane-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .event-count {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-faint);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0px 7px;
+    }
 
     .clear-btn {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--text-faint); font-family: inherit; font-size: 9px;
-      padding: 3px 8px; cursor: pointer; letter-spacing: 0.1em;
+      font-size: 12px;
+      color: var(--text-faint);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: background 0.1s, color 0.1s;
     }
 
-    .clear-btn:hover { color: var(--text-dim); border-color: var(--text-faint); }
+    .clear-btn:hover { background: var(--bg); color: var(--text-muted); }
 
-    .terminal-body {
-      flex: 1; overflow-y: auto; padding: 12px 16px;
-      font-size: 11px; line-height: 1.7;
-      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    .log-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
     }
 
-    .terminal-body::-webkit-scrollbar { width: 4px; }
-    .terminal-body::-webkit-scrollbar-thumb { background: var(--border); }
+    .log-body::-webkit-scrollbar { width: 4px; }
+    .log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    .log-entry {
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 40px; height: 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
       display: grid;
-      grid-template-columns: 80px 60px 80px 1fr 90px 30px;
-      gap: 10px; padding: 2px 0;
-      border-bottom: 1px solid transparent; transition: border-color 0.1s; align-items: baseline;
+      place-items: center;
+      margin-bottom: 6px;
+      background: var(--surface);
     }
 
-    .log-entry:hover { border-color: var(--border); }
-
-    .log-time { color: var(--text-faint); }
-    .log-auto { color: var(--cyan); }
-    .log-action.provision   { color: var(--green); }
-    .log-action.deprovision { color: var(--amber); }
-    .log-target { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .log-strategy { color: var(--text-dim); font-size: 10px; }
-    .log-repair-badge { font-size: 9px; color: var(--magenta); }
-
-    .log-status { font-size: 12px; }
-    .log-status.success { color: var(--green); }
-    .log-status.failure { color: var(--red); }
-    .log-status.repair  { color: var(--magenta); }
-
-    .terminal-empty {
-      text-align: center; margin-top: 80px;
-      color: var(--text-faint); font-size: 11px; line-height: 2;
+    .empty-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
     }
 
-    .terminal-empty pre { display: inline-block; text-align: left; line-height: 1.6; }
+    .empty-sub {
+      font-size: 12px;
+      color: var(--text-faint);
+    }
 
-    /* ── Stats ── */
-    .stats-pane { border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tl-entry {
+      display: flex;
+      gap: 10px;
+      min-height: 32px;
+    }
+
+    .tl-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 12px;
+      padding-top: 5px;
+    }
+
+    .tl-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      border: 1.5px solid;
+      flex-shrink: 0;
+    }
+
+    .tl-dot.success { background: var(--green-bg);  border-color: var(--green); }
+    .tl-dot.failure { background: var(--red-bg);    border-color: var(--red); }
+    .tl-dot.repair  { background: var(--purple-bg); border-color: var(--purple); }
+
+    .tl-line {
+      width: 1px;
+      flex: 1;
+      background: var(--border-muted);
+      margin-top: 3px;
+    }
+
+    .tl-content {
+      flex: 1;
+      min-width: 0;
+      padding: 3px 0 10px;
+    }
+
+    .tl-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+
+    .tl-ts {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .tl-intent {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 1px 7px;
+      border-radius: 20px;
+      border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.6;
+    }
+
+    .badge-auto       { color: var(--text-muted);  background: var(--bg);          border-color: var(--border); }
+    .badge-provision  { color: var(--accent);       background: var(--accent-bg);   border-color: var(--accent-border); }
+    .badge-deprovision{ color: var(--orange);       background: var(--orange-bg);   border-color: var(--orange-border); }
+    .badge-success    { color: var(--green);        background: var(--green-bg);    border-color: var(--green-border); }
+    .badge-failure    { color: var(--red);          background: var(--red-bg);      border-color: var(--red-border); }
+    .badge-repair     { color: var(--purple);       background: var(--purple-bg);   border-color: var(--purple-border); }
+    .badge-strategy   { color: var(--text-faint);   background: transparent;        border-color: var(--border-muted); }
+
+    /* ── Stats pane ────────────────────────────────── */
+    .stats-pane {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
     .stats-header {
-      padding: 8px 16px; border-bottom: 1px solid var(--border);
-      font-size: 10px; color: var(--text-dim);
-      letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0 14px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--shadow-xs);
+      flex-shrink: 0;
     }
 
-    .stats-body { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .stats-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
 
-    .metric-card { border: 1px solid var(--border); padding: 12px; margin-bottom: 10px; background: var(--bg-panel); }
+    .stats-body::-webkit-scrollbar { width: 4px; }
+    .stats-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    .metric-label { font-size: 9px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+    .metric-card {
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius);
+      padding: 9px 11px;
+      margin-bottom: 7px;
+    }
 
-    .metric-value { font-size: 26px; font-weight: 300; letter-spacing: -0.02em; line-height: 1; }
-    .metric-value.green   { color: var(--green); }
-    .metric-value.amber   { color: var(--amber); }
-    .metric-value.magenta { color: var(--magenta); }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-faint);
+      margin-bottom: 3px;
+    }
 
-    .gauge-bar { margin-top: 8px; height: 3px; background: var(--bg-dim); position: relative; }
-    .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); transition: width 0.4s; }
-    .gauge-fill.amber   { background: var(--amber); }
-    .gauge-fill.magenta { background: var(--magenta); }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text);
+    }
 
-    .ascii-gauge { margin-top: 6px; font-size: 10px; color: var(--text-faint); letter-spacing: 0.04em; white-space: pre; }
+    .progress-track {
+      margin-top: 7px;
+      height: 3px;
+      background: var(--bg);
+      border-radius: 2px;
+      overflow: hidden;
+    }
 
-    .recent-run { border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 8px; font-size: 10px; line-height: 1.8; }
-    .recent-run-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .run-id { color: var(--cyan); }
-    .run-summary { color: var(--text-dim); }
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.green  { background: var(--green); }
+    .progress-fill.red    { background: var(--red); }
+    .progress-fill.purple { background: var(--purple); }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-top: 4px;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--border-muted);
+      margin: 8px 0;
+    }
+
+    .sub-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    /* Recent runs list */
+    .run-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-muted);
+    }
+
+    .run-row:last-child { border-bottom: none; }
+
+    .run-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .run-status-dot.ok   { background: var(--green); }
+    .run-status-dot.fail { background: var(--red); }
+
+    .run-row-body { flex: 1; min-width: 0; }
+
+    .run-row-id {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .run-row-meta {
+      font-size: 11px;
+      color: var(--text-faint);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .run-row-dur {
+      font-size: 11px;
+      color: var(--text-faint);
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -244,97 +630,107 @@
 <header>
   <div class="brand">
     <div class="brand-icon">
-      <svg viewBox="0 0 16 16" fill="none" stroke="#39FF14" stroke-width="1.5">
-        <rect x="1" y="3" width="14" height="10" rx="1"/>
-        <path d="M4 7l2.5 2L4 11M8 11h4"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="2" width="12" height="10" rx="1.5"/>
+        <path d="M3.5 6l2 1.5-2 1.5M7.5 9h3"/>
       </svg>
     </div>
-    <div class="brand-name">playwright-saas-automator <span>// ops-terminal</span></div>
+    playwright-saas-automator
+    <span class="brand-sub">/ ops</span>
   </div>
-  <div class="header-status">
-    <span class="dot" id="conn-dot"></span>
-    <span id="conn-label">connecting</span>
-    <span>·</span>
-    <span id="run-counter">0 runs</span>
+  <div class="header-right">
+    <span class="run-pill" id="run-counter">0 runs</span>
   </div>
 </header>
 
 <div class="workspace">
 
+  <!-- ── Sidebar ── -->
   <aside class="sidebar">
     <div class="sidebar-section">
-      <div class="section-label">▸ automation</div>
+      <div class="section-label">Automation</div>
       <div id="automation-list"></div>
     </div>
 
     <div class="sidebar-section">
-      <div class="section-label">▸ action</div>
+      <div class="section-label">Action</div>
       <div class="action-toggle">
-        <button class="toggle-btn provision active" id="btn-provision" onclick="setAction('provision')">+ provision</button>
-        <button class="toggle-btn deprovision" id="btn-deprovision" onclick="setAction('deprovision')">− deprovision</button>
+        <button class="action-btn provision active" id="btn-provision" onclick="setAction('provision')">+ Provision</button>
+        <button class="action-btn deprovision" id="btn-deprovision" onclick="setAction('deprovision')">− Deprovision</button>
       </div>
     </div>
 
-    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
-      <div class="section-label">▸ parameters</div>
+    <div class="sidebar-section grow">
+      <div class="section-label">Parameters</div>
       <div id="param-fields"></div>
       <button class="run-btn" id="run-btn" onclick="runAutomation()">
-        <span class="run-spinner">◌</span>
-        <span class="run-label">▶ execute run</span>
+        <div class="spinner"></div>
+        <span class="run-label">Run automation</span>
       </button>
     </div>
   </aside>
 
-  <main class="terminal-pane">
+  <!-- ── Audit log ── -->
+  <main class="log-pane">
     <div class="pane-header">
       <div class="pane-title">
-        <span>◈</span>
-        <span>audit log</span>
-        <span id="log-count" style="color:var(--text-faint)">0 events</span>
+        Audit log
+        <span class="event-count" id="log-count">0 events</span>
       </div>
-      <button class="clear-btn" onclick="clearLog()">clear</button>
+      <button class="clear-btn" onclick="clearLog()">Clear</button>
     </div>
-    <div class="terminal-body" id="log">
-      <div class="terminal-empty" id="empty-state">
-        <pre>
-┌─────────────────────────────────────┐
-│   select automation →               │
-│   configure params  →               │
-│   ▶ execute run                     │
-│                                     │
-│   events stream live via SSE        │
-└─────────────────────────────────────┘</pre>
+    <div class="log-body" id="log">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#8C959F" stroke-width="1.5" stroke-linecap="round">
+            <rect x="1.5" y="3" width="13" height="10" rx="1.5"/>
+            <path d="M4 7l2 1.5L4 10M8 10h4"/>
+          </svg>
+        </div>
+        <div class="empty-title">No events yet</div>
+        <div class="empty-sub">Select an automation and run it — events stream live</div>
       </div>
+      <div class="timeline" id="timeline"></div>
     </div>
   </main>
 
+  <!-- ── Session metrics ── -->
   <aside class="stats-pane">
-    <div class="stats-header">◈ session metrics</div>
+    <div class="stats-header">Session metrics</div>
     <div class="stats-body">
+
       <div class="metric-card">
-        <div class="metric-label">total runs</div>
-        <div class="metric-value green" id="m-total">0</div>
+        <div class="metric-label">Total runs</div>
+        <div class="metric-value" id="m-total">0</div>
       </div>
+
       <div class="metric-card">
-        <div class="metric-label">success rate</div>
-        <div class="metric-value green" id="m-rate">—</div>
-        <div class="gauge-bar"><div class="gauge-fill" id="m-rate-bar" style="width:0%"></div></div>
-        <div class="ascii-gauge" id="m-rate-ascii">[                    ] 0%</div>
+        <div class="metric-label">Success rate</div>
+        <div class="metric-value" id="m-rate">—</div>
+        <div class="progress-track">
+          <div class="progress-fill green" id="m-rate-bar" style="width:0%"></div>
+        </div>
+        <div class="metric-sub" id="m-rate-sub">No runs yet</div>
       </div>
+
       <div class="metric-card">
-        <div class="metric-label">claude repairs used</div>
-        <div class="metric-value magenta" id="m-repairs">0</div>
-        <div class="gauge-bar"><div class="gauge-fill magenta" id="m-repair-bar" style="width:0%"></div></div>
-        <div class="ascii-gauge" id="m-repair-ascii">[                    ] 0/0</div>
+        <div class="metric-label">Claude repairs</div>
+        <div class="metric-value" id="m-repairs">0</div>
+        <div class="progress-track">
+          <div class="progress-fill purple" id="m-repair-bar" style="width:0%"></div>
+        </div>
+        <div class="metric-sub" id="m-repair-sub">0 of 0 budget used</div>
       </div>
+
       <div class="metric-card">
-        <div class="metric-label">avg duration</div>
-        <div class="metric-value amber" id="m-duration">—</div>
+        <div class="metric-label">Avg duration</div>
+        <div class="metric-value" id="m-duration">—</div>
       </div>
-      <div style="margin-top:14px;">
-        <div class="metric-label">recent runs</div>
-        <div id="recent-runs"></div>
-      </div>
+
+      <div class="section-divider"></div>
+      <div class="sub-label">Recent runs</div>
+      <div id="recent-runs"></div>
+
     </div>
   </aside>
 
@@ -351,39 +747,45 @@
 
   const PARAM_SCHEMAS = {
     github: {
-      provision:   [
-        { key:'orgName',  label:'org name',        ph:'acme-inc' },
-        { key:'username', label:'github username',  ph:'johndoe' },
-        { key:'role',     label:'role', type:'select', opts:['member','admin'] },
+      provision: [
+        { key: 'orgName',  label: 'Org name',        ph: 'acme-inc' },
+        { key: 'username', label: 'GitHub username',  ph: 'johndoe' },
+        { key: 'role',     label: 'Role', type: 'select', opts: ['member', 'admin'] },
       ],
       deprovision: [
-        { key:'orgName',  label:'org name',        ph:'acme-inc' },
-        { key:'username', label:'github username',  ph:'johndoe' },
+        { key: 'orgName',  label: 'Org name',        ph: 'acme-inc' },
+        { key: 'username', label: 'GitHub username',  ph: 'johndoe' },
       ],
     },
     notion: {
-      provision:   [
-        { key:'workspaceUrl', label:'workspace url', ph:'https://notion.so/my-ws' },
-        { key:'email',        label:'email',          ph:'user@example.com' },
-        { key:'role',         label:'role', type:'select', opts:['member','guest'] },
+      provision: [
+        { key: 'workspaceUrl', label: 'Workspace URL', ph: 'https://notion.so/my-ws' },
+        { key: 'email',        label: 'Email',          ph: 'user@example.com' },
+        { key: 'role',         label: 'Role', type: 'select', opts: ['member', 'guest'] },
       ],
       deprovision: [
-        { key:'workspaceUrl', label:'workspace url', ph:'https://notion.so/my-ws' },
-        { key:'email',        label:'email',          ph:'user@example.com' },
+        { key: 'workspaceUrl', label: 'Workspace URL', ph: 'https://notion.so/my-ws' },
+        { key: 'email',        label: 'Email',          ph: 'user@example.com' },
       ],
     },
     slack: {
-      provision:   [
-        { key:'workspaceUrl',  label:'workspace url',  ph:'https://app.slack.com/client/T...' },
-        { key:'channelName',   label:'channel name',   ph:'engineering' },
-        { key:'email',         label:'email',           ph:'user@example.com' },
+      provision: [
+        { key: 'workspaceUrl',  label: 'Workspace URL',  ph: 'https://app.slack.com/client/T…' },
+        { key: 'channelName',   label: 'Channel name',   ph: 'engineering' },
+        { key: 'email',         label: 'Email',           ph: 'user@example.com' },
       ],
       deprovision: [
-        { key:'workspaceUrl',  label:'workspace url',  ph:'https://app.slack.com/client/T...' },
-        { key:'channelName',   label:'channel name',   ph:'engineering' },
-        { key:'email',         label:'email',           ph:'user@example.com' },
+        { key: 'workspaceUrl',  label: 'Workspace URL',  ph: 'https://app.slack.com/client/T…' },
+        { key: 'channelName',   label: 'Channel name',   ph: 'engineering' },
+        { key: 'email',         label: 'Email',           ph: 'user@example.com' },
       ],
     },
+  }
+
+  const AUTO_ICONS = {
+    github: `<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33C3.72 14.46 3.26 13 3.26 13c-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.82 1.23.82.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>`,
+    notion: `<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M3.17 1.1L.98 1.37A.5.5 0 0 0 .5 1.87v11.26a.5.5 0 0 0 .57.5l2.1-.27a.5.5 0 0 0 .43-.5V1.6a.5.5 0 0 0-.43-.5zM6 1.5v12l4-1V2.5L6 1.5zm5 .5v10.5l3.5-1.5V3.5L11 2z"/></svg>`,
+    slack: `<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm0-7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm5 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm0 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM1 6.5h5V8H1V6.5zm8 0h5V8H9V6.5z"/></svg>`,
   }
 
   async function init() {
@@ -391,23 +793,22 @@
     const data = await res.json()
     state.automations = data.automations
     renderAutomationList()
-    selectAutomation(state.automations[0])
+    if (state.automations[0]) selectAutomation(state.automations[0])
     connectSSE()
   }
 
   function renderAutomationList() {
-    const icons = { github: '⬡', notion: '◉', slack: '◈' }
     document.getElementById('automation-list').innerHTML = state.automations.map(name => `
-      <button class="automation-btn" id="auto-${name}" onclick="selectAutomation('${name}')">
-        <span class="icon">${icons[name] ?? '○'}</span>
-        <span>${name}</span>
+      <button class="auto-btn" id="auto-${name}" onclick="selectAutomation('${name}')">
+        <div class="auto-avatar">${AUTO_ICONS[name] ?? ''}</div>
+        <span>${name.charAt(0).toUpperCase() + name.slice(1)}</span>
       </button>
     `).join('')
   }
 
   function selectAutomation(name) {
     state.selectedAuto = name
-    document.querySelectorAll('.automation-btn').forEach(b => b.classList.remove('active'))
+    document.querySelectorAll('.auto-btn').forEach(b => b.classList.remove('active'))
     document.getElementById(`auto-${name}`)?.classList.add('active')
     renderParamFields()
   }
@@ -423,12 +824,14 @@
     const schema = PARAM_SCHEMAS[state.selectedAuto]?.[state.action] ?? []
     document.getElementById('param-fields').innerHTML = schema.map(f => {
       if (f.type === 'select') {
-        return `<div class="field-group">
+        return `<div class="field">
           <label class="field-label">${f.label}</label>
-          <select class="field-select" id="param-${f.key}">${f.opts.map(o => `<option value="${o}">${o}</option>`).join('')}</select>
+          <select class="field-select" id="param-${f.key}">
+            ${f.opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+          </select>
         </div>`
       }
-      return `<div class="field-group">
+      return `<div class="field">
         <label class="field-label">${f.label}</label>
         <input class="field-input" id="param-${f.key}" placeholder="${f.ph ?? ''}" />
       </div>`
@@ -437,92 +840,123 @@
 
   function connectSSE() {
     const es = new EventSource('/api/events')
-    es.onopen = () => {
-      document.getElementById('conn-dot').classList.add('live')
-      document.getElementById('conn-label').textContent = 'live'
-    }
+    es.onopen = () => {}
     es.onmessage = (e) => {
       try {
         const event = JSON.parse(e.data)
         state.events.push(event)
-        appendLogEntry(event)
+        appendTimelineEntry(event)
         updateMetrics()
-      } catch { /* SSE heartbeat comment */ }
+      } catch { /* SSE heartbeat */ }
     }
     es.onerror = () => {
-      document.getElementById('conn-dot').classList.remove('live')
-      document.getElementById('conn-label').textContent = 'reconnecting'
-      setTimeout(connectSSE, 3000)
       es.close()
+      setTimeout(connectSSE, 3000)
     }
   }
 
-  function appendLogEntry(event) {
+  function appendTimelineEntry(event) {
     document.getElementById('empty-state')?.remove()
+
     const ts = new Date(event.timestamp).toLocaleTimeString('en', { hour12: false })
-    const strategyText = event.repairTriggered
-      ? `<span class="log-repair-badge">⚡ claude</span>`
-      : `<span>${event.strategySucceeded ?? '—'}</span>`
+    const isRepair = !!event.repairTriggered
+    const dotClass = isRepair ? 'repair' : event.outcome
+
+    const actionBadgeClass = event.action === 'provision' ? 'badge-provision' : 'badge-deprovision'
+    const outcomeBadgeClass = isRepair ? 'badge-repair' : `badge-${event.outcome}`
+    const outcomeBadgeText = isRepair ? '⚡ claude' : event.outcome
+
+    const strategyBadge = event.strategySucceeded
+      ? `<span class="badge badge-strategy">${event.strategySucceeded}</span>`
+      : ''
+
     const entry = document.createElement('div')
-    entry.className = 'log-entry'
+    entry.className = 'tl-entry'
     entry.innerHTML = `
-      <span class="log-time">${ts}</span>
-      <span class="log-auto">${event.automation}</span>
-      <span class="log-action ${event.action}">${event.action}</span>
-      <span class="log-target" title="${event.target}">${event.target}</span>
-      <span class="log-strategy">${strategyText}</span>
-      <span class="log-status ${event.repairTriggered ? 'repair' : event.outcome}">${event.outcome === 'success' ? '✓' : '✗'}</span>
+      <div class="tl-left">
+        <div class="tl-dot ${dotClass}"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-row">
+          <span class="tl-ts">${ts}</span>
+          <span class="badge badge-auto">${event.automation}</span>
+          <span class="badge ${actionBadgeClass}">${event.action}</span>
+          <span class="tl-intent" title="${event.intent ?? ''}">${event.intent ?? event.target}</span>
+          ${strategyBadge}
+          <span class="badge ${outcomeBadgeClass}">${outcomeBadgeText}</span>
+        </div>
+      </div>
     `
+
+    const timeline = document.getElementById('timeline')
+    timeline.appendChild(entry)
     const log = document.getElementById('log')
-    log.appendChild(entry)
     log.scrollTop = log.scrollHeight
-    document.getElementById('log-count').textContent = `${state.events.length} events`
+    document.getElementById('log-count').textContent = `${state.events.length} event${state.events.length !== 1 ? 's' : ''}`
   }
 
   function clearLog() {
-    document.getElementById('log').innerHTML = '<div class="terminal-empty" id="empty-state"><pre>\n┌─────────────────────────────────────┐\n│   select automation →               │\n│   configure params  →               │\n│   ▶ execute run                     │\n│                                     │\n│   events stream live via SSE        │\n└─────────────────────────────────────┘</pre></div>'
     state.events = []
+    document.getElementById('timeline').innerHTML = ''
     document.getElementById('log-count').textContent = '0 events'
+    const log = document.getElementById('log')
+    if (!log.querySelector('#empty-state')) {
+      const empty = document.createElement('div')
+      empty.id = 'empty-state'
+      empty.className = 'empty-state'
+      empty.innerHTML = `
+        <div class="empty-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#8C959F" stroke-width="1.5" stroke-linecap="round">
+            <rect x="1.5" y="3" width="13" height="10" rx="1.5"/>
+            <path d="M4 7l2 1.5L4 10M8 10h4"/>
+          </svg>
+        </div>
+        <div class="empty-title">No events yet</div>
+        <div class="empty-sub">Select an automation and run it — events stream live</div>
+      `
+      log.prepend(empty)
+    }
   }
 
   function updateMetrics() {
     const runs = state.runResults
     const total = runs.length
+
     document.getElementById('m-total').textContent = total
-    document.getElementById('run-counter').textContent = `${total} run${total === 1 ? '' : 's'}`
+    document.getElementById('run-counter').textContent = `${total} run${total !== 1 ? 's' : ''}`
+
     if (total === 0) return
 
-    const rate = Math.round((runs.filter(r => r.success).length / total) * 100)
+    const successCount = runs.filter(r => r.success).length
+    const rate = Math.round((successCount / total) * 100)
     document.getElementById('m-rate').textContent = `${rate}%`
-    document.getElementById('m-rate-bar').style.width = `${rate}%`
-    document.getElementById('m-rate-bar').className = `gauge-fill${rate < 80 ? (rate < 50 ? ' magenta' : ' amber') : ''}`
-    document.getElementById('m-rate-ascii').textContent = bar(rate, 20) + ` ${rate}%`
+    const rateBar = document.getElementById('m-rate-bar')
+    rateBar.style.width = `${rate}%`
+    rateBar.className = `progress-fill ${rate < 50 ? 'red' : 'green'}`
+    document.getElementById('m-rate-sub').textContent = `${successCount} of ${total} succeeded`
 
     const totalRepairs = runs.reduce((s, r) => s + (r.repairsUsed ?? 0), 0)
     const maxRepairs = total * 10
     const repairPct = maxRepairs > 0 ? Math.round((totalRepairs / maxRepairs) * 100) : 0
     document.getElementById('m-repairs').textContent = totalRepairs
     document.getElementById('m-repair-bar').style.width = `${repairPct}%`
-    document.getElementById('m-repair-ascii').textContent = bar(repairPct, 20) + ` ${totalRepairs}/${maxRepairs}`
+    document.getElementById('m-repair-sub').textContent = `${totalRepairs} of ${maxRepairs} budget used`
 
     const avgMs = Math.round(runs.reduce((s, r) => s + r.durationMs, 0) / total)
-    document.getElementById('m-duration').textContent = avgMs >= 1000 ? `${(avgMs/1000).toFixed(1)}s` : `${avgMs}ms`
+    document.getElementById('m-duration').textContent =
+      avgMs >= 1000 ? `${(avgMs / 1000).toFixed(1)}s` : `${avgMs}ms`
 
-    document.getElementById('recent-runs').innerHTML = [...runs].reverse().slice(0, 4).map(r => `
-      <div class="recent-run">
-        <div class="recent-run-header">
-          <span class="run-id">${r.run_id}</span>
-          <span style="color:${r.success ? 'var(--green)' : 'var(--red)'};">${r.success ? '✓ ok' : '✗ fail'}</span>
+    document.getElementById('recent-runs').innerHTML = [...runs].reverse().slice(0, 5).map(r => `
+      <div class="run-row">
+        <div class="run-status-dot ${r.success ? 'ok' : 'fail'}"></div>
+        <div class="run-row-body">
+          <div class="run-row-id">${r.run_id}</div>
+          <div class="run-row-meta">${r.automation} · ${r.action} · ${(r.target ?? '').slice(0, 20)}${(r.target ?? '').length > 20 ? '…' : ''}</div>
         </div>
-        <div class="run-summary">${r.automation} · ${r.action} · ${(r.target ?? '').slice(0,22)}${(r.target ?? '').length > 22 ? '…' : ''}</div>
-        <div class="run-summary">${r.durationMs}ms · ${r.repairsUsed ?? 0} repair${r.repairsUsed !== 1 ? 's' : ''}</div>
+        <div class="run-row-dur">${r.durationMs < 1000 ? `${r.durationMs}ms` : `${(r.durationMs / 1000).toFixed(1)}s`}</div>
       </div>
     `).join('')
-  }
-
-  function bar(pct, w) {
-    const f = Math.round((pct / 100) * w)
-    return '[' + '█'.repeat(f) + '░'.repeat(w - f) + ']'
   }
 
   async function runAutomation() {
@@ -546,8 +980,8 @@
       const result = await res.json()
       state.runResults.push(result)
       updateMetrics()
-    } catch (err) {
-      // network error — SSE stream will already show the failure event
+    } catch {
+      // network error — SSE already shows events
     } finally {
       runBtn.disabled = false
       runBtn.classList.remove('running')
