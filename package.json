@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Resilient SaaS browser automation with ARIA-first selectors and Claude-powered selector repair",
+  "main": "dist/dashboard/server.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/dashboard/server.js",
+    "dev": "tsx src/dashboard/server.ts",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
@@ -12,12 +16,16 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
+    "@octokit/rest": "^22.0.1",
+    "@slack/web-api": "^7.18.0",
     "dotenv": "^16.4.5",
+    "express": "^5.2.1",
     "playwright": "^1.47.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.5.0",
     "@vitest/coverage-v8": "^2.1.1",
     "tsx": "^4.19.0",

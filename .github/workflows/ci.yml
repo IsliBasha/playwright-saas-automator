@@ -13,3 +13,4 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:unit:coverage
+      - run: npm run build

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>playwright-saas-automator // ops-terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+    :root {
+      --bg:        #0A0E0A;
+      --bg-panel:  #0F150F;
+      --bg-dim:    #141A14;
+      --border:    #1E2A1E;
+      --text:      #C8D8C8;
+      --text-dim:  #4A5A4A;
+      --text-faint:#2A382A;
+      --green:     #39FF14;
+      --amber:     #F5B041;
+      --magenta:   #FF00FF;
+      --red:       #FF3B30;
+      --cyan:      #00FFFF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      background: var(--bg-panel);
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+
+    .brand-icon {
+      width: 28px; height: 28px;
+      border: 1px solid var(--green);
+      display: grid; place-items: center;
+    }
+
+    .brand-icon svg { width: 16px; height: 16px; }
+
+    .brand-name { font-size: 12px; font-weight: 500; letter-spacing: 0.08em; }
+    .brand-name span { color: var(--text-dim); }
+
+    .header-status {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 16px;
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); display: inline-block; }
+    .dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      height: calc(100vh - 53px);
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+    .sidebar-section { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+
+    .section-label {
+      font-size: 9px; color: var(--text-faint);
+      letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .automation-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 8px 10px;
+      background: transparent; border: 1px solid transparent;
+      color: var(--text-dim); font-family: inherit; font-size: 11px;
+      cursor: pointer; text-align: left; letter-spacing: 0.04em;
+      transition: all 0.12s;
+    }
+
+    .automation-btn:hover { color: var(--text); border-color: var(--border); }
+    .automation-btn.active { color: var(--green); border-color: var(--green); background: rgba(57,255,20,0.04); }
+    .automation-btn .icon { opacity: .5; font-size: 13px; }
+    .automation-btn.active .icon { opacity: 1; }
+
+    .action-toggle { display: flex; gap: 8px; margin-top: 4px; }
+
+    .toggle-btn {
+      flex: 1; padding: 6px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-dim); font-family: inherit; font-size: 10px;
+      cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.12s;
+    }
+
+    .toggle-btn.active.provision  { border-color: var(--green);  color: var(--green);  background: rgba(57,255,20,0.06); }
+    .toggle-btn.active.deprovision{ border-color: var(--amber);  color: var(--amber);  background: rgba(245,176,65,0.06); }
+
+    .field-group { margin-top: 12px; }
+
+    .field-label {
+      display: block; font-size: 9px; color: var(--text-faint);
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px;
+    }
+
+    .field-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-family: inherit; font-size: 11px;
+      padding: 7px 9px; outline: none; transition: border-color 0.12s;
+    }
+
+    .field-input:focus { border-color: var(--cyan); }
+    .field-input::placeholder { color: var(--text-faint); }
+
+    .field-select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-family: inherit; font-size: 11px;
+      padding: 7px 9px; outline: none; appearance: none; cursor: pointer;
+    }
+
+    .run-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; margin-top: 14px; padding: 10px;
+      background: transparent; border: 1px solid var(--green);
+      color: var(--green); font-family: inherit; font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+    }
+
+    .run-btn:hover { background: rgba(57,255,20,0.08); box-shadow: 0 0 12px rgba(57,255,20,0.15); }
+    .run-btn:disabled { border-color: var(--text-faint); color: var(--text-faint); cursor: not-allowed; }
+    .run-btn.running { border-color: var(--amber); color: var(--amber); animation: blink-border 0.8s infinite; }
+    @keyframes blink-border { 0%,100% { border-color: var(--amber); } 50% { border-color: var(--text-faint); } }
+    .run-spinner { display: none; }
+    .run-btn.running .run-spinner { display: inline; }
+    .run-btn.running .run-label { display: none; }
+
+    /* ── Terminal ── */
+    .terminal-pane { display: flex; flex-direction: column; overflow: hidden; }
+
+    .pane-header {
+      padding: 8px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg-panel);
+    }
+
+    .pane-title { display: flex; align-items: center; gap: 8px; }
+
+    .clear-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-faint); font-family: inherit; font-size: 9px;
+      padding: 3px 8px; cursor: pointer; letter-spacing: 0.1em;
+    }
+
+    .clear-btn:hover { color: var(--text-dim); border-color: var(--text-faint); }
+
+    .terminal-body {
+      flex: 1; overflow-y: auto; padding: 12px 16px;
+      font-size: 11px; line-height: 1.7;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+
+    .terminal-body::-webkit-scrollbar { width: 4px; }
+    .terminal-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .log-entry {
+      display: grid;
+      grid-template-columns: 80px 60px 80px 1fr 90px 30px;
+      gap: 10px; padding: 2px 0;
+      border-bottom: 1px solid transparent; transition: border-color 0.1s; align-items: baseline;
+    }
+
+    .log-entry:hover { border-color: var(--border); }
+
+    .log-time { color: var(--text-faint); }
+    .log-auto { color: var(--cyan); }
+    .log-action.provision   { color: var(--green); }
+    .log-action.deprovision { color: var(--amber); }
+    .log-target { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-strategy { color: var(--text-dim); font-size: 10px; }
+    .log-repair-badge { font-size: 9px; color: var(--magenta); }
+
+    .log-status { font-size: 12px; }
+    .log-status.success { color: var(--green); }
+    .log-status.failure { color: var(--red); }
+    .log-status.repair  { color: var(--magenta); }
+
+    .terminal-empty {
+      text-align: center; margin-top: 80px;
+      color: var(--text-faint); font-size: 11px; line-height: 2;
+    }
+
+    .terminal-empty pre { display: inline-block; text-align: left; line-height: 1.6; }
+
+    /* ── Stats ── */
+    .stats-pane { border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+    .stats-header {
+      padding: 8px 16px; border-bottom: 1px solid var(--border);
+      font-size: 10px; color: var(--text-dim);
+      letter-spacing: 0.1em; text-transform: uppercase; background: var(--bg-panel);
+    }
+
+    .stats-body { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+    .metric-card { border: 1px solid var(--border); padding: 12px; margin-bottom: 10px; background: var(--bg-panel); }
+
+    .metric-label { font-size: 9px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+
+    .metric-value { font-size: 26px; font-weight: 300; letter-spacing: -0.02em; line-height: 1; }
+    .metric-value.green   { color: var(--green); }
+    .metric-value.amber   { color: var(--amber); }
+    .metric-value.magenta { color: var(--magenta); }
+
+    .gauge-bar { margin-top: 8px; height: 3px; background: var(--bg-dim); position: relative; }
+    .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); transition: width 0.4s; }
+    .gauge-fill.amber   { background: var(--amber); }
+    .gauge-fill.magenta { background: var(--magenta); }
+
+    .ascii-gauge { margin-top: 6px; font-size: 10px; color: var(--text-faint); letter-spacing: 0.04em; white-space: pre; }
+
+    .recent-run { border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 8px; font-size: 10px; line-height: 1.8; }
+    .recent-run-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .run-id { color: var(--cyan); }
+    .run-summary { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 16 16" fill="none" stroke="#39FF14" stroke-width="1.5">
+        <rect x="1" y="3" width="14" height="10" rx="1"/>
+        <path d="M4 7l2.5 2L4 11M8 11h4"/>
+      </svg>
+    </div>
+    <div class="brand-name">playwright-saas-automator <span>// ops-terminal</span></div>
+  </div>
+  <div class="header-status">
+    <span class="dot" id="conn-dot"></span>
+    <span id="conn-label">connecting</span>
+    <span>·</span>
+    <span id="run-counter">0 runs</span>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-label">▸ automation</div>
+      <div id="automation-list"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">▸ action</div>
+      <div class="action-toggle">
+        <button class="toggle-btn provision active" id="btn-provision" onclick="setAction('provision')">+ provision</button>
+        <button class="toggle-btn deprovision" id="btn-deprovision" onclick="setAction('deprovision')">− deprovision</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;overflow-y:auto;">
+      <div class="section-label">▸ parameters</div>
+      <div id="param-fields"></div>
+      <button class="run-btn" id="run-btn" onclick="runAutomation()">
+        <span class="run-spinner">◌</span>
+        <span class="run-label">▶ execute run</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="terminal-pane">
+    <div class="pane-header">
+      <div class="pane-title">
+        <span>◈</span>
+        <span>audit log</span>
+        <span id="log-count" style="color:var(--text-faint)">0 events</span>
+      </div>
+      <button class="clear-btn" onclick="clearLog()">clear</button>
+    </div>
+    <div class="terminal-body" id="log">
+      <div class="terminal-empty" id="empty-state">
+        <pre>
+┌─────────────────────────────────────┐
+│   select automation →               │
+│   configure params  →               │
+│   ▶ execute run                     │
+│                                     │
+│   events stream live via SSE        │
+└─────────────────────────────────────┘</pre>
+      </div>
+    </div>
+  </main>
+
+  <aside class="stats-pane">
+    <div class="stats-header">◈ session metrics</div>
+    <div class="stats-body">
+      <div class="metric-card">
+        <div class="metric-label">total runs</div>
+        <div class="metric-value green" id="m-total">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">success rate</div>
+        <div class="metric-value green" id="m-rate">—</div>
+        <div class="gauge-bar"><div class="gauge-fill" id="m-rate-bar" style="width:0%"></div></div>
+        <div class="ascii-gauge" id="m-rate-ascii">[                    ] 0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">claude repairs used</div>
+        <div class="metric-value magenta" id="m-repairs">0</div>
+        <div class="gauge-bar"><div class="gauge-fill magenta" id="m-repair-bar" style="width:0%"></div></div>
+        <div class="ascii-gauge" id="m-repair-ascii">[                    ] 0/0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">avg duration</div>
+        <div class="metric-value amber" id="m-duration">—</div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="metric-label">recent runs</div>
+        <div id="recent-runs"></div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  const state = {
+    automations: [],
+    selectedAuto: null,
+    action: 'provision',
+    events: [],
+    runResults: [],
+  }
+
+  const PARAM_SCHEMAS = {
+    github: {
+      provision:   [
+        { key:'orgName',  label:'org name',        ph:'acme-inc' },
+        { key:'username', label:'github username',  ph:'johndoe' },
+        { key:'role',     label:'role', type:'select', opts:['member','admin'] },
+      ],
+      deprovision: [
+        { key:'orgName',  label:'org name',        ph:'acme-inc' },
+        { key:'username', label:'github username',  ph:'johndoe' },
+      ],
+    },
+    notion: {
+      provision:   [
+        { key:'workspaceUrl', label:'workspace url', ph:'https://notion.so/my-ws' },
+        { key:'email',        label:'email',          ph:'user@example.com' },
+        { key:'role',         label:'role', type:'select', opts:['member','guest'] },
+      ],
+      deprovision: [
+        { key:'workspaceUrl', label:'workspace url', ph:'https://notion.so/my-ws' },
+        { key:'email',        label:'email',          ph:'user@example.com' },
+      ],
+    },
+    slack: {
+      provision:   [
+        { key:'workspaceUrl',  label:'workspace url',  ph:'https://app.slack.com/client/T...' },
+        { key:'channelName',   label:'channel name',   ph:'engineering' },
+        { key:'email',         label:'email',           ph:'user@example.com' },
+      ],
+      deprovision: [
+        { key:'workspaceUrl',  label:'workspace url',  ph:'https://app.slack.com/client/T...' },
+        { key:'channelName',   label:'channel name',   ph:'engineering' },
+        { key:'email',         label:'email',           ph:'user@example.com' },
+      ],
+    },
+  }
+
+  async function init() {
+    const res = await fetch('/api/automations')
+    const data = await res.json()
+    state.automations = data.automations
+    renderAutomationList()
+    selectAutomation(state.automations[0])
+    connectSSE()
+  }
+
+  function renderAutomationList() {
+    const icons = { github: '⬡', notion: '◉', slack: '◈' }
+    document.getElementById('automation-list').innerHTML = state.automations.map(name => `
+      <button class="automation-btn" id="auto-${name}" onclick="selectAutomation('${name}')">
+        <span class="icon">${icons[name] ?? '○'}</span>
+        <span>${name}</span>
+      </button>
+    `).join('')
+  }
+
+  function selectAutomation(name) {
+    state.selectedAuto = name
+    document.querySelectorAll('.automation-btn').forEach(b => b.classList.remove('active'))
+    document.getElementById(`auto-${name}`)?.classList.add('active')
+    renderParamFields()
+  }
+
+  function setAction(action) {
+    state.action = action
+    document.getElementById('btn-provision').classList.toggle('active', action === 'provision')
+    document.getElementById('btn-deprovision').classList.toggle('active', action === 'deprovision')
+    renderParamFields()
+  }
+
+  function renderParamFields() {
+    const schema = PARAM_SCHEMAS[state.selectedAuto]?.[state.action] ?? []
+    document.getElementById('param-fields').innerHTML = schema.map(f => {
+      if (f.type === 'select') {
+        return `<div class="field-group">
+          <label class="field-label">${f.label}</label>
+          <select class="field-select" id="param-${f.key}">${f.opts.map(o => `<option value="${o}">${o}</option>`).join('')}</select>
+        </div>`
+      }
+      return `<div class="field-group">
+        <label class="field-label">${f.label}</label>
+        <input class="field-input" id="param-${f.key}" placeholder="${f.ph ?? ''}" />
+      </div>`
+    }).join('')
+  }
+
+  function connectSSE() {
+    const es = new EventSource('/api/events')
+    es.onopen = () => {
+      document.getElementById('conn-dot').classList.add('live')
+      document.getElementById('conn-label').textContent = 'live'
+    }
+    es.onmessage = (e) => {
+      try {
+        const event = JSON.parse(e.data)
+        state.events.push(event)
+        appendLogEntry(event)
+        updateMetrics()
+      } catch { /* SSE heartbeat comment */ }
+    }
+    es.onerror = () => {
+      document.getElementById('conn-dot').classList.remove('live')
+      document.getElementById('conn-label').textContent = 'reconnecting'
+      setTimeout(connectSSE, 3000)
+      es.close()
+    }
+  }
+
+  function appendLogEntry(event) {
+    document.getElementById('empty-state')?.remove()
+    const ts = new Date(event.timestamp).toLocaleTimeString('en', { hour12: false })
+    const strategyText = event.repairTriggered
+      ? `<span class="log-repair-badge">⚡ claude</span>`
+      : `<span>${event.strategySucceeded ?? '—'}</span>`
+    const entry = document.createElement('div')
+    entry.className = 'log-entry'
+    entry.innerHTML = `
+      <span class="log-time">${ts}</span>
+      <span class="log-auto">${event.automation}</span>
+      <span class="log-action ${event.action}">${event.action}</span>
+      <span class="log-target" title="${event.target}">${event.target}</span>
+      <span class="log-strategy">${strategyText}</span>
+      <span class="log-status ${event.repairTriggered ? 'repair' : event.outcome}">${event.outcome === 'success' ? '✓' : '✗'}</span>
+    `
+    const log = document.getElementById('log')
+    log.appendChild(entry)
+    log.scrollTop = log.scrollHeight
+    document.getElementById('log-count').textContent = `${state.events.length} events`
+  }
+
+  function clearLog() {
+    document.getElementById('log').innerHTML = '<div class="terminal-empty" id="empty-state"><pre>\n┌─────────────────────────────────────┐\n│   select automation →               │\n│   configure params  →               │\n│   ▶ execute run                     │\n│                                     │\n│   events stream live via SSE        │\n└─────────────────────────────────────┘</pre></div>'
+    state.events = []
+    document.getElementById('log-count').textContent = '0 events'
+  }
+
+  function updateMetrics() {
+    const runs = state.runResults
+    const total = runs.length
+    document.getElementById('m-total').textContent = total
+    document.getElementById('run-counter').textContent = `${total} run${total === 1 ? '' : 's'}`
+    if (total === 0) return
+
+    const rate = Math.round((runs.filter(r => r.success).length / total) * 100)
+    document.getElementById('m-rate').textContent = `${rate}%`
+    document.getElementById('m-rate-bar').style.width = `${rate}%`
+    document.getElementById('m-rate-bar').className = `gauge-fill${rate < 80 ? (rate < 50 ? ' magenta' : ' amber') : ''}`
+    document.getElementById('m-rate-ascii').textContent = bar(rate, 20) + ` ${rate}%`
+
+    const totalRepairs = runs.reduce((s, r) => s + (r.repairsUsed ?? 0), 0)
+    const maxRepairs = total * 10
+    const repairPct = maxRepairs > 0 ? Math.round((totalRepairs / maxRepairs) * 100) : 0
+    document.getElementById('m-repairs').textContent = totalRepairs
+    document.getElementById('m-repair-bar').style.width = `${repairPct}%`
+    document.getElementById('m-repair-ascii').textContent = bar(repairPct, 20) + ` ${totalRepairs}/${maxRepairs}`
+
+    const avgMs = Math.round(runs.reduce((s, r) => s + r.durationMs, 0) / total)
+    document.getElementById('m-duration').textContent = avgMs >= 1000 ? `${(avgMs/1000).toFixed(1)}s` : `${avgMs}ms`
+
+    document.getElementById('recent-runs').innerHTML = [...runs].reverse().slice(0, 4).map(r => `
+      <div class="recent-run">
+        <div class="recent-run-header">
+          <span class="run-id">${r.run_id}</span>
+          <span style="color:${r.success ? 'var(--green)' : 'var(--red)'};">${r.success ? '✓ ok' : '✗ fail'}</span>
+        </div>
+        <div class="run-summary">${r.automation} · ${r.action} · ${(r.target ?? '').slice(0,22)}${(r.target ?? '').length > 22 ? '…' : ''}</div>
+        <div class="run-summary">${r.durationMs}ms · ${r.repairsUsed ?? 0} repair${r.repairsUsed !== 1 ? 's' : ''}</div>
+      </div>
+    `).join('')
+  }
+
+  function bar(pct, w) {
+    const f = Math.round((pct / 100) * w)
+    return '[' + '█'.repeat(f) + '░'.repeat(w - f) + ']'
+  }
+
+  async function runAutomation() {
+    if (!state.selectedAuto) return
+    const schema = PARAM_SCHEMAS[state.selectedAuto]?.[state.action] ?? []
+    const params = {}
+    for (const f of schema) {
+      params[f.key] = document.getElementById(`param-${f.key}`)?.value?.trim() ?? ''
+    }
+
+    const runBtn = document.getElementById('run-btn')
+    runBtn.disabled = true
+    runBtn.classList.add('running')
+
+    try {
+      const res = await fetch('/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ automation: state.selectedAuto, action: state.action, params }),
+      })
+      const result = await res.json()
+      state.runResults.push(result)
+      updateMetrics()
+    } catch (err) {
+      // network error — SSE stream will already show the failure event
+    } finally {
+      runBtn.disabled = false
+      runBtn.classList.remove('running')
+    }
+  }
+
+  init()
+</script>
+</body>
+</html>
