@@ -4,6 +4,8 @@ Resilient SaaS provisioning automation built on Playwright and Claude AI. Automa
 
 [![CI](https://github.com/IsliBasha/playwright-saas-automator/actions/workflows/ci.yml/badge.svg)](https://github.com/IsliBasha/playwright-saas-automator/actions)
 
+![Ops dashboard](docs/screenshot.png)
+
 ## What It Does
 
 When you onboard a new employee, you need to invite them to GitHub orgs, Notion workspaces, and Slack channels. When they leave, you remove them from all three. This tool automates those flows using Playwright — and when SaaS UIs inevitably change and break selectors, a Claude Haiku repair layer rebuilds them on the fly.
